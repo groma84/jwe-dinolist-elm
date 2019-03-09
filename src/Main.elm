@@ -16,6 +16,38 @@ type DinosaurType
 ---- MODEL ----
 
 
+absoluteSocialMinimum =
+    1
+
+
+absoluteSocialMaximum =
+    25
+
+
+absolutePopulationMinimum =
+    0
+
+
+absolutePopulationMaximum =
+    25
+
+
+absoluteGrasslandMinimum =
+    1
+
+
+absoluteGrasslandMaximum =
+    25000
+
+
+absoluteForestMinimum =
+    1
+
+
+absoluteForestMaximum =
+    25000
+
+
 type alias Dinosaur =
     { name : String
     , food : DinosaurType
@@ -33,10 +65,10 @@ dinos : List Dinosaur
 dinos =
     [ { name = "Fakeosaurus 1"
       , food = Herbivore
-      , socialMin = 1
+      , socialMin = 2
       , socialMax = 4
       , populationMin = 0
-      , populationMax = 12
+      , populationMax = 23
       , grassland = 1234
       , forest = 432
       , baseRating = 12
@@ -44,9 +76,9 @@ dinos =
     , { name = "Fakeosaurus 2"
       , food = Herbivore
       , socialMin = 11
-      , socialMax = 44
+      , socialMax = 25
       , populationMin = 4
-      , populationMax = 123
+      , populationMax = 12
       , grassland = 12345
       , forest = 4321
       , baseRating = 120
@@ -68,6 +100,16 @@ type alias Model =
     { filteredDinos : List Dinosaur
     , showHerbivores : Bool
     , showCarnivores : Bool
+    , socialMinimumLower : Int
+    , socialMinimumUpper : Int
+    , socialMaximumLower : Int
+    , socialMaximumUpper : Int
+    , populationMinimumLower : Int
+    , populationMinimumUpper : Int
+    , populationMaximumLower : Int
+    , populationMaximumUpper : Int
+    , grassland : Int
+    , forest : Int
     }
 
 
@@ -76,6 +118,16 @@ init =
     ( { filteredDinos = dinos
       , showHerbivores = True
       , showCarnivores = True
+      , socialMinimumLower = absoluteSocialMinimum
+      , socialMinimumUpper = absoluteSocialMaximum
+      , socialMaximumLower = absoluteSocialMinimum
+      , socialMaximumUpper = absoluteSocialMaximum
+      , populationMinimumLower = absolutePopulationMinimum
+      , populationMinimumUpper = absolutePopulationMaximum
+      , populationMaximumLower = absolutePopulationMinimum
+      , populationMaximumUpper = absolutePopulationMaximum
+      , grassland = absoluteGrasslandMaximum
+      , forest = absoluteForestMaximum
       }
     , Cmd.none
     )
@@ -92,6 +144,15 @@ type alias Filter =
 filterByType : DinosaurType -> Dinosaur -> Bool
 filterByType dinosaurType dinosaur =
     dinosaur.food == dinosaurType
+
+
+isWithinBoundariesFilter : Int -> Int -> (Dinosaur -> Int) -> Dinosaur -> Bool
+isWithinBoundariesFilter lowerLimit upperLimit valueSelector dino =
+    let
+        value =
+            valueSelector dino
+    in
+    value >= lowerLimit && value <= upperLimit
 
 
 createFilters : Model -> List Filter
@@ -118,6 +179,12 @@ createFilters model =
                     keepNone
     in
     [ typeFilter
+    , isWithinBoundariesFilter model.socialMinimumLower model.socialMinimumUpper .socialMin
+    , isWithinBoundariesFilter model.socialMaximumLower model.socialMaximumUpper .socialMax
+    , isWithinBoundariesFilter model.populationMinimumLower model.populationMinimumUpper .populationMin
+    , isWithinBoundariesFilter model.populationMaximumLower model.populationMaximumUpper .populationMax
+    , isWithinBoundariesFilter 1 model.grassland .grassland
+    , isWithinBoundariesFilter 1 model.forest .forest
     ]
 
 
@@ -134,27 +201,75 @@ type Msg
     = NoOp
     | ShowHerbivoresChanged Bool
     | ShowCarnivoresChanged Bool
+    | SocialMinimumLowerChanged Float
+    | SocialMinimumUpperChanged Float
+    | SocialMaximumLowerChanged Float
+    | SocialMaximumUpperChanged Float
+    | PopulationMinimumLowerChanged Float
+    | PopulationMinimumUpperChanged Float
+    | PopulationMaximumLowerChanged Float
+    | PopulationMaximumUpperChanged Float
+    | GrasslandChanged Float
+    | ForestChanged Float
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
+    let
+        updateFilteredDinos filtersChanged =
+            ( { filtersChanged | filteredDinos = filterDinos dinos filtersChanged }, Cmd.none )
+    in
     case msg of
         NoOp ->
             ( model, Cmd.none )
 
         ShowHerbivoresChanged active ->
-            let
-                filtersChanged =
-                    { model | showHerbivores = active }
-            in
-            ( { filtersChanged | filteredDinos = filterDinos dinos filtersChanged }, Cmd.none )
+            { model | showHerbivores = active }
+                |> updateFilteredDinos
 
         ShowCarnivoresChanged active ->
-            let
-                filtersChanged =
-                    { model | showCarnivores = active }
-            in
-            ( { filtersChanged | filteredDinos = filterDinos dinos filtersChanged }, Cmd.none )
+            { model | showCarnivores = active }
+                |> updateFilteredDinos
+
+        SocialMinimumLowerChanged newVal ->
+            { model | socialMinimumLower = round newVal }
+                |> updateFilteredDinos
+
+        SocialMinimumUpperChanged newVal ->
+            { model | socialMinimumUpper = round newVal }
+                |> updateFilteredDinos
+
+        SocialMaximumLowerChanged newVal ->
+            { model | socialMaximumLower = round newVal }
+                |> updateFilteredDinos
+
+        SocialMaximumUpperChanged newVal ->
+            { model | socialMaximumUpper = round newVal }
+                |> updateFilteredDinos
+
+        PopulationMinimumLowerChanged newVal ->
+            { model | populationMinimumLower = round newVal }
+                |> updateFilteredDinos
+
+        PopulationMinimumUpperChanged newVal ->
+            { model | populationMinimumUpper = round newVal }
+                |> updateFilteredDinos
+
+        PopulationMaximumLowerChanged newVal ->
+            { model | populationMaximumLower = round newVal }
+                |> updateFilteredDinos
+
+        PopulationMaximumUpperChanged newVal ->
+            { model | populationMaximumUpper = round newVal }
+                |> updateFilteredDinos
+
+        GrasslandChanged newVal ->
+            { model | grassland = round newVal }
+                |> updateFilteredDinos
+
+        ForestChanged newVal ->
+            { model | forest = round newVal }
+                |> updateFilteredDinos
 
 
 
@@ -175,6 +290,15 @@ view : Model -> Html Msg
 view model =
     let
         resultsTable =
+            let
+                numberColumn heading valueFn =
+                    { header = Element.text heading
+                    , width = fill
+                    , view =
+                        \dino ->
+                            Element.text (String.fromInt (valueFn dino))
+                    }
+            in
             Element.table []
                 { data = model.filteredDinos
                 , columns =
@@ -190,35 +314,100 @@ view model =
                             \dino ->
                                 Element.text (dinoTypeToString dino.food)
                       }
-                    , { header = Element.text "Social Min."
-                      , width = fill
-                      , view =
-                            \dino ->
-                                Element.text (String.fromInt dino.socialMin)
-                      }
-                    , { header = Element.text "Social Max."
-                      , width = fill
-                      , view =
-                            \dino ->
-                                Element.text (String.fromInt dino.socialMax)
-                      }
+                    , numberColumn "Social Min." .socialMin
+                    , numberColumn "Social Max." .socialMax
+                    , numberColumn "Pop. Min." .populationMin
+                    , numberColumn "Pop. Max." .populationMax
+                    , numberColumn "Grassland" .grassland
+                    , numberColumn "Forest" .forest
+                    , numberColumn "Base Rating" .baseRating
                     ]
                 }
 
         filterConfiguration =
+            let
+                checkbox onChangeMsg checkedVal labelText =
+                    Element.Input.checkbox []
+                        { onChange = onChangeMsg
+                        , icon = Element.Input.defaultCheckbox
+                        , checked = checkedVal
+                        , label = Element.Input.labelRight [] (Element.text labelText)
+                        }
+
+                singleSliderRow absMin absMax onChangeMsg currentValue labelText =
+                    Element.Input.slider []
+                        { onChange = onChangeMsg
+                        , label = Element.Input.labelAbove [] (Element.text labelText)
+                        , min = absMin
+                        , max = absMax
+                        , value = toFloat currentValue
+                        , thumb = defaultThumb
+                        , step = Just 1
+                        }
+
+                sliderRow absMin absMax minimumConfig maximumConfig =
+                    let
+                        slider onChangeMsg currentValue labelText =
+                            Element.Input.slider []
+                                { onChange = onChangeMsg
+                                , label = Element.Input.labelAbove [] (Element.text labelText)
+                                , min = absMin
+                                , max = absMax
+                                , value = toFloat currentValue
+                                , thumb = defaultThumb
+                                , step = Just 1
+                                }
+                    in
+                    Element.row []
+                        [ slider minimumConfig.onChangeMsg minimumConfig.currentValue minimumConfig.labelText
+                        , slider maximumConfig.onChangeMsg maximumConfig.currentValue maximumConfig.labelText
+                        ]
+            in
             Element.column []
-                [ Element.Input.checkbox []
-                    { onChange = ShowHerbivoresChanged
-                    , icon = Element.Input.defaultCheckbox
-                    , checked = model.showHerbivores
-                    , label = Element.Input.labelRight [] (Element.text "Herbivores")
+                [ checkbox ShowHerbivoresChanged model.showHerbivores "Herbivores"
+                , checkbox ShowCarnivoresChanged model.showCarnivores "Carnivores"
+                , sliderRow absoluteSocialMinimum
+                    absoluteSocialMaximum
+                    { onChangeMsg = SocialMinimumLowerChanged
+                    , currentValue = model.socialMinimumLower
+                    , labelText = "Social Min From:" ++ String.fromInt model.socialMinimumLower
                     }
-                , Element.Input.checkbox []
-                    { onChange = ShowCarnivoresChanged
-                    , icon = Element.Input.defaultCheckbox
-                    , checked = model.showCarnivores
-                    , label = Element.Input.labelRight [] (Element.text "Carnivores")
+                    { onChangeMsg = SocialMinimumUpperChanged
+                    , currentValue = model.socialMinimumUpper
+                    , labelText = "Social Min To:" ++ String.fromInt model.socialMinimumUpper
                     }
+                , sliderRow absoluteSocialMinimum
+                    absoluteSocialMaximum
+                    { onChangeMsg = SocialMaximumLowerChanged
+                    , currentValue = model.socialMaximumLower
+                    , labelText = "Social Max From:" ++ String.fromInt model.socialMaximumLower
+                    }
+                    { onChangeMsg = SocialMaximumUpperChanged
+                    , currentValue = model.socialMaximumUpper
+                    , labelText = "Social Max To:" ++ String.fromInt model.socialMaximumUpper
+                    }
+                , sliderRow absolutePopulationMinimum
+                    absolutePopulationMaximum
+                    { onChangeMsg = PopulationMinimumLowerChanged
+                    , currentValue = model.populationMinimumLower
+                    , labelText = "Population Min From:" ++ String.fromInt model.populationMinimumLower
+                    }
+                    { onChangeMsg = PopulationMinimumUpperChanged
+                    , currentValue = model.populationMinimumUpper
+                    , labelText = "Population Min To:" ++ String.fromInt model.populationMinimumUpper
+                    }
+                , sliderRow absolutePopulationMinimum
+                    absolutePopulationMaximum
+                    { onChangeMsg = PopulationMaximumLowerChanged
+                    , currentValue = model.populationMaximumLower
+                    , labelText = "Population Max From:" ++ String.fromInt model.populationMaximumLower
+                    }
+                    { onChangeMsg = PopulationMaximumUpperChanged
+                    , currentValue = model.populationMaximumUpper
+                    , labelText = "Population Max To:" ++ String.fromInt model.populationMaximumUpper
+                    }
+                , singleSliderRow absoluteGrasslandMinimum absoluteGrasslandMaximum GrasslandChanged model.grassland ("Grassland avail.:" ++ String.fromInt model.grassland)
+                , singleSliderRow absoluteForestMinimum absoluteForestMaximum ForestChanged model.forest ("Forest avail.:" ++ String.fromInt model.forest)
                 ]
     in
     Element.layout [] <|
