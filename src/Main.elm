@@ -1,15 +1,11 @@
 module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
+import Dinosaurs exposing (..)
 import Element exposing (..)
 import Element.Input exposing (..)
 import Html exposing (Html, div, h1, img, text)
 import Html.Attributes exposing (src)
-
-
-type DinosaurType
-    = Herbivore
-    | Carnivore
 
 
 
@@ -46,54 +42,6 @@ absoluteForestMinimum =
 
 absoluteForestMaximum =
     25000
-
-
-type alias Dinosaur =
-    { name : String
-    , food : DinosaurType
-    , socialMin : Int
-    , socialMax : Int
-    , populationMin : Int
-    , populationMax : Int
-    , grassland : Int
-    , forest : Int
-    , baseRating : Int
-    }
-
-
-dinos : List Dinosaur
-dinos =
-    [ { name = "Fakeosaurus 1"
-      , food = Herbivore
-      , socialMin = 2
-      , socialMax = 4
-      , populationMin = 0
-      , populationMax = 23
-      , grassland = 1234
-      , forest = 432
-      , baseRating = 12
-      }
-    , { name = "Fakeosaurus 2"
-      , food = Herbivore
-      , socialMin = 11
-      , socialMax = 25
-      , populationMin = 4
-      , populationMax = 12
-      , grassland = 12345
-      , forest = 4321
-      , baseRating = 120
-      }
-    , { name = "Fakeosaurus 3"
-      , food = Carnivore
-      , socialMin = 1
-      , socialMax = 1
-      , populationMin = 1
-      , populationMax = 8
-      , grassland = 12340
-      , forest = 4320
-      , baseRating = 210
-      }
-    ]
 
 
 type alias Model =
@@ -143,7 +91,7 @@ type alias Filter =
 
 filterByType : DinosaurType -> Dinosaur -> Bool
 filterByType dinosaurType dinosaur =
-    dinosaur.food == dinosaurType
+    dinosaur.dinosaurType == dinosaurType
 
 
 isWithinBoundariesFilter : Int -> Int -> (Dinosaur -> Int) -> Dinosaur -> Bool
@@ -312,7 +260,7 @@ view model =
                       , width = fill
                       , view =
                             \dino ->
-                                Element.text (dinoTypeToString dino.food)
+                                Element.text (dinoTypeToString dino.dinosaurType)
                       }
                     , numberColumn "Social Min." .socialMin
                     , numberColumn "Social Max." .socialMax
