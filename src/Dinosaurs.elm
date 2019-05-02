@@ -20,8 +20,8 @@ type alias Dinosaur =
     }
 
 
-dinos : List Dinosaur
-dinos =
+herbivores : List Dinosaur
+herbivores =
     [ { name = "Chasmosaurus"
       , dinosaurType = Herbivore
       , basePrice = 250000
@@ -374,6 +374,17 @@ dinos =
       , socialMin = 1
       , socialMax = 4
       }
+    , { name = "Olorotitan"
+      , dinosaurType = Herbivore
+      , basePrice = 175000
+      , baseRating = 35
+      , grassland = 2212
+      , forest = 1170
+      , populationMin = 4
+      , populationMax = 25
+      , socialMin = 3
+      , socialMax = 12
+      }
     , { name = "Polacanthus"
       , dinosaurType = Herbivore
       , basePrice = 350000
@@ -408,4 +419,201 @@ dinos =
       , socialMax = 9
       }
     ]
+
+
+carnivores : List Dinosaur
+carnivores =
+    [ { name = "Allosaurus"
+      , dinosaurType = Carnivore
+      , basePrice = 1873000
+      , baseRating = 228
+      , grassland = 10206
+      , forest = 1282
+      , populationMin = 0
+      , populationMax = 16
+      , socialMin = 1
+      , socialMax = 1
+      }
+    , { name = "Baryonyx"
+      , dinosaurType = Carnivore
+      , basePrice = 742000
+      , baseRating = 137
+      , grassland = 7968
+      , forest = 504
+      , populationMin = 0
+      , populationMax = 16
+      , socialMin = 1
+      , socialMax = 2
+      }
+    , { name = "Carcharodontosaurus"
+      , dinosaurType = Carnivore
+      , basePrice = 1750000
+      , baseRating = 213
+      , grassland = 10314
+      , forest = 1207
+      , populationMin = 0
+      , populationMax = 15
+      , socialMin = 1
+      , socialMax = 2
+      }
+    , { name = "Carnotaurus"
+      , dinosaurType = Carnivore
+      , basePrice = 1384000
+      , baseRating = 191
+      , grassland = 8160
+      , forest = 528
+      , populationMin = 0
+      , populationMax = 20
+      , socialMin = 1
+      , socialMax = 2
+      }
+    , { name = "Ceratosaurus"
+      , dinosaurType = Carnivore
+      , basePrice = 550000
+      , baseRating = 102
+      , grassland = 8951
+      , forest = 553
+      , populationMin = 0
+      , populationMax = 20
+      , socialMin = 1
+      , socialMax = 3
+      }
+    , { name = "Deinonychus"
+      , dinosaurType = Carnivore
+      , basePrice = 446000
+      , baseRating = 75
+      , grassland = 4464
+      , forest = 1564
+      , populationMin = 0
+      , populationMax = 18
+      , socialMin = 3
+      , socialMax = 8
+      }
+    , { name = "Dilophosaurus"
+      , dinosaurType = Carnivore
+      , basePrice = 317000
+      , baseRating = 69
+      , grassland = 2744
+      , forest = 2744
+      , populationMin = 0
+      , populationMax = 22
+      , socialMin = 1
+      , socialMax = 12
+      }
+    , { name = "Giganotosaurus"
+      , dinosaurType = Carnivore
+      , basePrice = 1717000
+      , baseRating = 216
+      , grassland = 9884
+      , forest = 553
+      , populationMin = 0
+      , populationMax = 13
+      , socialMin = 1
+      , socialMax = 2
+      }
+    , { name = "Indominus Rex"
+      , dinosaurType = Carnivore
+      , basePrice = 2516000
+      , baseRating = 273
+      , grassland = 15246
+      , forest = 1607
+      , populationMin = 0
+      , populationMax = 10
+      , socialMin = 1
+      , socialMax = 1
+      }
+    , { name = "Indoraptor"
+      , dinosaurType = Carnivore
+      , basePrice = 2710000
+      , baseRating = 281
+      , grassland = 6864
+      , forest = 2972
+      , populationMin = 0
+      , populationMax = 10
+      , socialMin = 1
+      , socialMax = 1
+      }
+    , { name = "Majungasaurus"
+      , dinosaurType = Carnivore
+      , basePrice = 1465000
+      , baseRating = 156
+      , grassland = 9360
+      , forest = 578
+      , populationMin = 0
+      , populationMax = 16
+      , socialMin = 1
+      , socialMax = 2
+      }
+    , { name = "Metriacanthosaurus"
+      , dinosaurType = Carnivore
+      , basePrice = 873000
+      , baseRating = 126
+      , grassland = 6776
+      , forest = 1552
+      , populationMin = 0
+      , populationMax = 18
+      , socialMin = 1
+      , socialMax = 2
+      }
+    , { name = "Spinosaurus"
+      , dinosaurType = Carnivore
+      , basePrice = 2012000
+      , baseRating = 240
+      , grassland = 14208
+      , forest = 833
+      , populationMin = 0
+      , populationMax = 13
+      , socialMin = 1
+      , socialMax = 2
+      }
+    , { name = "Suchomimus"
+      , dinosaurType = Carnivore
+      , basePrice = 1228000
+      , baseRating = 144
+      , grassland = 9464
+      , forest = 605
+      , populationMin = 0
+      , populationMax = 16
+      , socialMin = 1
+      , socialMax = 2
+      }
+    , { name = "Troodon"
+      , dinosaurType = Carnivore
+      , basePrice = 302000
+      , baseRating = 63
+      , grassland = 3520
+      , forest = 2263
+      , populationMin = 0
+      , populationMax = 25
+      , socialMin = 4
+      , socialMax = 16
+      }
+    , { name = "Tyrannosaurus Rex"
+      , dinosaurType = Carnivore
+      , basePrice = 1964000
+      , baseRating = 234
+      , grassland = 12720
+      , forest = 772
+      , populationMin = 0
+      , populationMax = 15
+      , socialMin = 1
+      , socialMax = 1
+      }
+    , { name = "Velociraptor"
+      , dinosaurType = Carnivore
+      , basePrice = 373000
+      , baseRating = 74
+      , grassland = 6258
+      , forest = 772
+      , populationMin = 0
+      , populationMax = 20
+      , socialMin = 2
+      , socialMax = 6
+      }
+    ]
+
+
+dinos : List Dinosaur
+dinos =
+    List.concat [ herbivores, carnivores ]
         |> List.sortBy .name
