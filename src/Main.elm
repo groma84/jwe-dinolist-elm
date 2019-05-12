@@ -234,6 +234,16 @@ dinoTypeToString dinoType =
             "Carnivore"
 
 
+dinoTypeToImage : DinosaurType -> String
+dinoTypeToImage dinoType =
+    case dinoType of
+        Herbivore ->
+            "%PUBLIC_URL%/1f995.svg"
+
+        Carnivore ->
+            "%PUBLIC_URL%/1f996.svg"
+
+
 view : Model -> Html Msg
 view model =
     let
@@ -254,21 +264,80 @@ view model =
                       , width = fill
                       , view =
                             \dino ->
-                                Element.text dino.name
+                                Element.paragraph [ paddingXY 0 16 ] [ Element.text dino.name ]
                       }
-                    , { header = Element.text "Type"
+                    , { header = Element.text ""
                       , width = fill
                       , view =
                             \dino ->
-                                Element.text (dinoTypeToString dino.dinosaurType)
+                                Element.image [ width (Element.px 40), height (Element.px 40) ]
+                                    { src = dinoTypeToImage dino.dinosaurType
+                                    , description = dinoTypeToString dino.dinosaurType
+                                    }
                       }
-                    , numberColumn "Social Min." .socialMin
-                    , numberColumn "Social Max." .socialMax
-                    , numberColumn "Pop. Min." .populationMin
-                    , numberColumn "Pop. Max." .populationMax
-                    , numberColumn "Grassland" .grassland
-                    , numberColumn "Forest" .forest
-                    , numberColumn "Base Rating" .baseRating
+                    , { header = Element.text ""
+                      , width = fill
+                      , view =
+                            \dino ->
+                                Element.column []
+                                    [ Element.row []
+                                        [ Element.image [ width (Element.px 20), height (Element.px 20) ]
+                                            { src = "%PUBLIC_URL%/1f495.svg"
+                                            , description = "Social min-max"
+                                            }
+                                        , Element.text (String.fromInt dino.socialMin ++ " - " ++ String.fromInt dino.socialMax)
+                                        ]
+                                    , Element.row []
+                                        [ Element.image [ width (Element.px 20), height (Element.px 20) ]
+                                            { src = "%PUBLIC_URL%/1f465.svg"
+                                            , description = "Population min-max"
+                                            }
+                                        , Element.text (String.fromInt dino.populationMin ++ " - " ++ String.fromInt dino.populationMax)
+                                        ]
+                                    ]
+                      }
+                    , { header = Element.text ""
+                      , width = fill
+                      , view =
+                            \dino ->
+                                Element.column []
+                                    [ Element.row []
+                                        [ Element.image [ width (Element.px 20), height (Element.px 20) ]
+                                            { src = "%PUBLIC_URL%/1f33e.svg"
+                                            , description = "Grassland"
+                                            }
+                                        , Element.text (String.fromInt dino.grassland)
+                                        ]
+                                    , Element.row []
+                                        [ Element.image [ width (Element.px 20), height (Element.px 20) ]
+                                            { src = "%PUBLIC_URL%/1f332.svg"
+                                            , description = "Forest"
+                                            }
+                                        , Element.text (String.fromInt dino.forest)
+                                        ]
+                                    ]
+                      }
+                    , { header = Element.text ""
+                      , width = fill
+                      , view =
+                            \dino ->
+                                Element.column []
+                                    [ Element.row []
+                                        [ Element.image [ width (Element.px 20), height (Element.px 20) ]
+                                            { src = "%PUBLIC_URL%/2b50.svg"
+                                            , description = "Base Rating"
+                                            }
+                                        , Element.text (String.fromInt dino.baseRating)
+                                        ]
+                                    , Element.row []
+                                        [ Element.image [ width (Element.px 20), height (Element.px 20) ]
+                                            { src = "%PUBLIC_URL%/1f4b5.svg"
+                                            , description = "Cost in k$"
+                                            }
+                                        , Element.text (String.fromInt dino.basePrice)
+                                        ]
+                                    ]
+                      }
                     ]
                 }
 
