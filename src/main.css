@@ -8,3 +8,7 @@
 [data-elm-hot="true"] {
   height: inherit;
 }
+
+.main-dino-list li:nth-child(even) {
+  background-color: antiquewhite;
+}

@@ -1,11 +1,12 @@
 module Main exposing (Model, Msg(..), init, main, update, view)
 
+--import Element exposing (..)
+--import Element.Input exposing (..)
+
 import Browser
 import Dinosaurs exposing (..)
-import Element exposing (..)
-import Element.Input exposing (..)
-import Html exposing (Html, div, h1, img, text)
-import Html.Attributes exposing (src)
+import Html exposing (..)
+import Html.Attributes exposing (alt, class, height, max, min, src, step, style, type_, width)
 
 
 
@@ -244,197 +245,211 @@ dinoTypeToImage dinoType =
             "%PUBLIC_URL%/1f996.svg"
 
 
+bigImage : String -> String -> Html Msg
+bigImage srcUrl altText =
+    let
+        attrs =
+            [ src srcUrl, alt altText ]
+
+        sizeAttrs =
+            [ width 50, height 50 ]
+    in
+    img (List.concat [ attrs, sizeAttrs ]) []
+
+
+smallImageWithText : String -> String -> Html Msg
+smallImageWithText srcUrl altText =
+    let
+        attrs =
+            [ src srcUrl, alt altText ]
+
+        sizeAttrs =
+            [ width 25, height 25 ]
+    in
+    img (List.concat [ attrs, sizeAttrs ]) []
+
+
+fixedWidth rem =
+    style "width" (String.fromInt rem ++ "rem")
+
+
+fixedWidthText rem txt textAlign =
+    span [ style "display" "inline-block", style "text-align" textAlign, fixedWidth rem ] [ text txt ]
+
+
+fixedWidthTextRightAligned rem txt =
+    fixedWidthText rem txt "right"
+
+
+fixedWidthTextCenterAligned rem txt =
+    fixedWidthText rem txt "center"
+
+
+fromTo from to =
+    [ fixedWidthTextRightAligned 1 (String.fromInt from)
+    , fixedWidthTextCenterAligned 1 " - "
+    , fixedWidthTextRightAligned 1 (String.fromInt to)
+    ]
+
+
+iconAndContent svg altText content =
+    span []
+        [ smallImageWithText ("%PUBLIC_URL%/" ++ svg ++ ".svg") altText
+        , content
+        ]
+
+
+createRow : Dinosaur -> Html Msg
+createRow dino =
+    li [ style "display" "flex", style "align-items" "center" ]
+        [ div [ fixedWidth 10 ]
+            [ span []
+                [ text dino.name
+                ]
+            ]
+        , div [ style "padding" "0 1rem" ]
+            [ bigImage (dinoTypeToImage dino.dinosaurType) (dinoTypeToString dino.dinosaurType) ]
+        , div [ style "padding" "0 1rem" ]
+            [ div [ style "display" "flex", style "flex-direction" "column" ]
+                [ iconAndContent "1f495" "Social min-max" (span [ fixedWidth 3 ] (fromTo dino.socialMin dino.socialMax))
+                , iconAndContent "1f465" "Population min-max" (span [ fixedWidth 3 ] (fromTo dino.populationMin dino.populationMax))
+                ]
+            ]
+        , div [ style "padding" "0 1rem" ]
+            [ div [ style "display" "flex", style "flex-direction" "column" ]
+                [ iconAndContent "1f33e" "Grassland" (fixedWidthTextRightAligned 3 (String.fromInt dino.grassland))
+                , iconAndContent "1f332" "Forest" (fixedWidthTextRightAligned 3 (String.fromInt dino.forest))
+                ]
+            ]
+        , div [ style "padding" "0 1rem" ]
+            [ div [ style "display" "flex", style "flex-direction" "column" ]
+                [ iconAndContent "2b50" "Base Rating" (fixedWidthTextRightAligned 3 (String.fromInt dino.baseRating))
+                , iconAndContent "1f4b5" "Cost in k$" (fixedWidthTextRightAligned 3 (String.fromInt (dino.basePrice // 1000) ++ "k"))
+                ]
+            ]
+        ]
+
+
+
+-- TODO
+
+
+slider =
+    input [ type_ "range", min "1", max "23", step "1" ] []
+
+
 view : Model -> Html Msg
 view model =
-    let
-        resultsTable =
-            let
-                numberColumn heading valueFn =
-                    { header = Element.text heading
-                    , width = fill
-                    , view =
-                        \dino ->
-                            Element.text (String.fromInt (valueFn dino))
-                    }
-            in
-            Element.table []
-                { data = model.filteredDinos
-                , columns =
-                    [ { header = Element.text "Name"
-                      , width = fill
-                      , view =
-                            \dino ->
-                                Element.paragraph [ paddingXY 0 16 ] [ Element.text dino.name ]
-                      }
-                    , { header = Element.text ""
-                      , width = fill
-                      , view =
-                            \dino ->
-                                Element.image [ width (Element.px 40), height (Element.px 40) ]
-                                    { src = dinoTypeToImage dino.dinosaurType
-                                    , description = dinoTypeToString dino.dinosaurType
-                                    }
-                      }
-                    , { header = Element.text ""
-                      , width = fill
-                      , view =
-                            \dino ->
-                                Element.column []
-                                    [ Element.row []
-                                        [ Element.image [ width (Element.px 20), height (Element.px 20) ]
-                                            { src = "%PUBLIC_URL%/1f495.svg"
-                                            , description = "Social min-max"
-                                            }
-                                        , Element.text (String.fromInt dino.socialMin ++ " - " ++ String.fromInt dino.socialMax)
-                                        ]
-                                    , Element.row []
-                                        [ Element.image [ width (Element.px 20), height (Element.px 20) ]
-                                            { src = "%PUBLIC_URL%/1f465.svg"
-                                            , description = "Population min-max"
-                                            }
-                                        , Element.text (String.fromInt dino.populationMin ++ " - " ++ String.fromInt dino.populationMax)
-                                        ]
-                                    ]
-                      }
-                    , { header = Element.text ""
-                      , width = fill
-                      , view =
-                            \dino ->
-                                Element.column []
-                                    [ Element.row []
-                                        [ Element.image [ width (Element.px 20), height (Element.px 20) ]
-                                            { src = "%PUBLIC_URL%/1f33e.svg"
-                                            , description = "Grassland"
-                                            }
-                                        , Element.text (String.fromInt dino.grassland)
-                                        ]
-                                    , Element.row []
-                                        [ Element.image [ width (Element.px 20), height (Element.px 20) ]
-                                            { src = "%PUBLIC_URL%/1f332.svg"
-                                            , description = "Forest"
-                                            }
-                                        , Element.text (String.fromInt dino.forest)
-                                        ]
-                                    ]
-                      }
-                    , { header = Element.text ""
-                      , width = fill
-                      , view =
-                            \dino ->
-                                Element.column []
-                                    [ Element.row []
-                                        [ Element.image [ width (Element.px 20), height (Element.px 20) ]
-                                            { src = "%PUBLIC_URL%/2b50.svg"
-                                            , description = "Base Rating"
-                                            }
-                                        , Element.text (String.fromInt dino.baseRating)
-                                        ]
-                                    , Element.row []
-                                        [ Element.image [ width (Element.px 20), height (Element.px 20) ]
-                                            { src = "%PUBLIC_URL%/1f4b5.svg"
-                                            , description = "Cost in k$"
-                                            }
-                                        , Element.text (String.fromInt dino.basePrice)
-                                        ]
-                                    ]
-                      }
-                    ]
-                }
-
-        filterConfiguration =
-            let
-                checkbox onChangeMsg checkedVal labelText =
-                    Element.Input.checkbox []
-                        { onChange = onChangeMsg
-                        , icon = Element.Input.defaultCheckbox
-                        , checked = checkedVal
-                        , label = Element.Input.labelRight [] (Element.text labelText)
-                        }
-
-                singleSliderRow absMin absMax onChangeMsg currentValue labelText =
-                    Element.Input.slider []
-                        { onChange = onChangeMsg
-                        , label = Element.Input.labelAbove [] (Element.text labelText)
-                        , min = absMin
-                        , max = absMax
-                        , value = toFloat currentValue
-                        , thumb = defaultThumb
-                        , step = Just 1
-                        }
-
-                sliderRow absMin absMax minimumConfig maximumConfig =
-                    let
-                        slider onChangeMsg currentValue labelText =
-                            Element.Input.slider []
-                                { onChange = onChangeMsg
-                                , label = Element.Input.labelAbove [] (Element.text labelText)
-                                , min = absMin
-                                , max = absMax
-                                , value = toFloat currentValue
-                                , thumb = defaultThumb
-                                , step = Just 1
-                                }
-                    in
-                    Element.row []
-                        [ slider minimumConfig.onChangeMsg minimumConfig.currentValue minimumConfig.labelText
-                        , slider maximumConfig.onChangeMsg maximumConfig.currentValue maximumConfig.labelText
-                        ]
-            in
-            Element.column []
-                [ checkbox ShowHerbivoresChanged model.showHerbivores "Herbivores"
-                , checkbox ShowCarnivoresChanged model.showCarnivores "Carnivores"
-                , sliderRow absoluteSocialMinimum
-                    absoluteSocialMaximum
-                    { onChangeMsg = SocialMinimumLowerChanged
-                    , currentValue = model.socialMinimumLower
-                    , labelText = "Social Min From:" ++ String.fromInt model.socialMinimumLower
-                    }
-                    { onChangeMsg = SocialMinimumUpperChanged
-                    , currentValue = model.socialMinimumUpper
-                    , labelText = "Social Min To:" ++ String.fromInt model.socialMinimumUpper
-                    }
-                , sliderRow absoluteSocialMinimum
-                    absoluteSocialMaximum
-                    { onChangeMsg = SocialMaximumLowerChanged
-                    , currentValue = model.socialMaximumLower
-                    , labelText = "Social Max From:" ++ String.fromInt model.socialMaximumLower
-                    }
-                    { onChangeMsg = SocialMaximumUpperChanged
-                    , currentValue = model.socialMaximumUpper
-                    , labelText = "Social Max To:" ++ String.fromInt model.socialMaximumUpper
-                    }
-                , sliderRow absolutePopulationMinimum
-                    absolutePopulationMaximum
-                    { onChangeMsg = PopulationMinimumLowerChanged
-                    , currentValue = model.populationMinimumLower
-                    , labelText = "Population Min From:" ++ String.fromInt model.populationMinimumLower
-                    }
-                    { onChangeMsg = PopulationMinimumUpperChanged
-                    , currentValue = model.populationMinimumUpper
-                    , labelText = "Population Min To:" ++ String.fromInt model.populationMinimumUpper
-                    }
-                , sliderRow absolutePopulationMinimum
-                    absolutePopulationMaximum
-                    { onChangeMsg = PopulationMaximumLowerChanged
-                    , currentValue = model.populationMaximumLower
-                    , labelText = "Population Max From:" ++ String.fromInt model.populationMaximumLower
-                    }
-                    { onChangeMsg = PopulationMaximumUpperChanged
-                    , currentValue = model.populationMaximumUpper
-                    , labelText = "Population Max To:" ++ String.fromInt model.populationMaximumUpper
-                    }
-                , singleSliderRow absoluteGrasslandMinimum absoluteGrasslandMaximum GrasslandChanged model.grassland ("Grassland avail.:" ++ String.fromInt model.grassland)
-                , singleSliderRow absoluteForestMinimum absoluteForestMaximum ForestChanged model.forest ("Forest avail.:" ++ String.fromInt model.forest)
-                ]
-    in
-    Element.layout [] <|
-        Element.wrappedRow []
-            [ Element.column [] [ filterConfiguration ]
-            , Element.column [] [ resultsTable ]
+    div []
+        [ div []
+            [ slider
             ]
+        , div []
+            [ ol [ class "main-dino-list" ]
+                (List.map createRow model.filteredDinos)
+            ]
+        ]
 
 
 
+{-
+   elmUiView : Model -> Html Msg
+   elmUiView model =
+       let
+
+
+           filterConfiguration =
+               let
+                   checkbox onChangeMsg checkedVal labelText =
+                       Element.Input.checkbox []
+                           { onChange = onChangeMsg
+                           , icon = Element.Input.defaultCheckbox
+                           , checked = checkedVal
+                           , label = Element.Input.labelRight [] (Element.text labelText)
+                           }
+
+                   singleSliderRow absMin absMax onChangeMsg currentValue labelText =
+                       Element.Input.slider []
+                           { onChange = onChangeMsg
+                           , label = Element.Input.labelAbove [] (Element.text labelText)
+                           , min = absMin
+                           , max = absMax
+                           , value = toFloat currentValue
+                           , thumb = defaultThumb
+                           , step = Just 1
+                           }
+
+                   sliderRow absMin absMax minimumConfig maximumConfig =
+                       let
+                           slider onChangeMsg currentValue labelText =
+                               Element.Input.slider []
+                                   { onChange = onChangeMsg
+                                   , label = Element.Input.labelAbove [] (Element.text labelText)
+                                   , min = absMin
+                                   , max = absMax
+                                   , value = toFloat currentValue
+                                   , thumb = defaultThumb
+                                   , step = Just 1
+                                   }
+                       in
+                       Element.row []
+                           [ slider minimumConfig.onChangeMsg minimumConfig.currentValue minimumConfig.labelText
+                           , slider maximumConfig.onChangeMsg maximumConfig.currentValue maximumConfig.labelText
+                           ]
+               in
+               Element.column []
+                   [ checkbox ShowHerbivoresChanged model.showHerbivores "Herbivores"
+                   , checkbox ShowCarnivoresChanged model.showCarnivores "Carnivores"
+                   , sliderRow absoluteSocialMinimum
+                       absoluteSocialMaximum
+                       { onChangeMsg = SocialMinimumLowerChanged
+                       , currentValue = model.socialMinimumLower
+                       , labelText = "Social Min From:" ++ String.fromInt model.socialMinimumLower
+                       }
+                       { onChangeMsg = SocialMinimumUpperChanged
+                       , currentValue = model.socialMinimumUpper
+                       , labelText = "Social Min To:" ++ String.fromInt model.socialMinimumUpper
+                       }
+                   , sliderRow absoluteSocialMinimum
+                       absoluteSocialMaximum
+                       { onChangeMsg = SocialMaximumLowerChanged
+                       , currentValue = model.socialMaximumLower
+                       , labelText = "Social Max From:" ++ String.fromInt model.socialMaximumLower
+                       }
+                       { onChangeMsg = SocialMaximumUpperChanged
+                       , currentValue = model.socialMaximumUpper
+                       , labelText = "Social Max To:" ++ String.fromInt model.socialMaximumUpper
+                       }
+                   , sliderRow absolutePopulationMinimum
+                       absolutePopulationMaximum
+                       { onChangeMsg = PopulationMinimumLowerChanged
+                       , currentValue = model.populationMinimumLower
+                       , labelText = "Population Min From:" ++ String.fromInt model.populationMinimumLower
+                       }
+                       { onChangeMsg = PopulationMinimumUpperChanged
+                       , currentValue = model.populationMinimumUpper
+                       , labelText = "Population Min To:" ++ String.fromInt model.populationMinimumUpper
+                       }
+                   , sliderRow absolutePopulationMinimum
+                       absolutePopulationMaximum
+                       { onChangeMsg = PopulationMaximumLowerChanged
+                       , currentValue = model.populationMaximumLower
+                       , labelText = "Population Max From:" ++ String.fromInt model.populationMaximumLower
+                       }
+                       { onChangeMsg = PopulationMaximumUpperChanged
+                       , currentValue = model.populationMaximumUpper
+                       , labelText = "Population Max To:" ++ String.fromInt model.populationMaximumUpper
+                       }
+                   , singleSliderRow absoluteGrasslandMinimum absoluteGrasslandMaximum GrasslandChanged model.grassland ("Grassland avail.:" ++ String.fromInt model.grassland)
+                   , singleSliderRow absoluteForestMinimum absoluteForestMaximum ForestChanged model.forest ("Forest avail.:" ++ String.fromInt model.forest)
+                   ]
+       in
+       Element.layout [] <|
+           Element.wrappedRow []
+               [ Element.column [] [ filterConfiguration ]
+               , Element.column [] [ resultsTable ]
+               ]
+-}
 ---- SUBSCRIPTIONS ----
 ---- PROGRAM ----
 
