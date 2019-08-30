@@ -340,6 +340,17 @@ slider =
 
 view : Model -> Html Msg
 view model =
+    {-
+       UI-Idee:
+       Man hat pro Zahl einen - und einen + Button - so ist es auch auf dem Smartphone gut bedienbar
+       Die Zahlen springen dann immer eine Zahl weiter in der Liste der möglichen Zahlen - man hat also keine 1er oder so,
+       sondern je nachdem, was eben die nächste bei einem Dino vorkommende Zahl ist. Vielleicht mit einem Zipper?
+       Ggf. müssen zu nah zusammen liegende Zahlen gebündelt werden, wenn sich mehrere Dinos nur um ein paar m² unterscheiden.
+       Über eine platzsparende Anordnung muss ich mir allerdings noch Gedanken machen.
+
+       Außerdem zu tun: Daten für nächsten Patch aktualisieren, alle Hybriden freischalten und eintragen, Claire-Dinos eintragen,
+       neue Symbole für Fleischfresser, Pflanzenfresser, Fischfresser einführen - auch als Filter mit je einer Checkbox.
+    -}
     div []
         [ div []
             [ slider
