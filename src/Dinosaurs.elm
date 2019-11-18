@@ -4,6 +4,7 @@ module Dinosaurs exposing (Dinosaur, DinosaurType(..), dinos)
 type DinosaurType
     = Herbivore
     | Carnivore
+    | Pescavore
 
 
 type alias Dinosaur =

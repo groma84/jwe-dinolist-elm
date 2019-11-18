@@ -6,49 +6,19 @@ module Main exposing (Model, Msg(..), init, main, update, view)
 import Browser
 import Dinosaurs exposing (..)
 import Html exposing (..)
-import Html.Attributes exposing (alt, class, height, max, min, src, step, style, type_, width)
+import Html.Attributes exposing (alt, checked, class, for, height, id, max, min, name, src, step, style, type_, width)
+import Html.Events exposing (onClick)
 
 
 
 ---- MODEL ----
 
 
-absoluteSocialMinimum =
-    1
-
-
-absoluteSocialMaximum =
-    25
-
-
-absolutePopulationMinimum =
-    0
-
-
-absolutePopulationMaximum =
-    25
-
-
-absoluteGrasslandMinimum =
-    1
-
-
-absoluteGrasslandMaximum =
-    25000
-
-
-absoluteForestMinimum =
-    1
-
-
-absoluteForestMaximum =
-    25000
-
-
 type alias Model =
     { filteredDinos : List Dinosaur
     , showHerbivores : Bool
     , showCarnivores : Bool
+    , showPescavores : Bool
     , socialMinimumLower : Int
     , socialMinimumUpper : Int
     , socialMaximumLower : Int
@@ -64,19 +34,57 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
+    let
+        socialMinimum =
+            List.map .socialMin dinos
+                |> List.sort
+                |> List.minimum
+                |> Maybe.withDefault 1
+
+        socialMaximum =
+            List.map .socialMax dinos
+                |> List.sort
+                |> List.maximum
+                |> Maybe.withDefault 50
+
+        populationMinimum =
+            List.map .populationMin dinos
+                |> List.sort
+                |> List.minimum
+                |> Maybe.withDefault 1
+
+        populationMaximum =
+            List.map .populationMax dinos
+                |> List.sort
+                |> List.maximum
+                |> Maybe.withDefault 50
+
+        grasslandMaximum =
+            List.map .grassland dinos
+                |> List.sort
+                |> List.maximum
+                |> Maybe.withDefault 25000
+
+        forestMaximum =
+            List.map .forest dinos
+                |> List.sort
+                |> List.maximum
+                |> Maybe.withDefault 25000
+    in
     ( { filteredDinos = dinos
       , showHerbivores = True
       , showCarnivores = True
-      , socialMinimumLower = absoluteSocialMinimum
-      , socialMinimumUpper = absoluteSocialMaximum
-      , socialMaximumLower = absoluteSocialMinimum
-      , socialMaximumUpper = absoluteSocialMaximum
-      , populationMinimumLower = absolutePopulationMinimum
-      , populationMinimumUpper = absolutePopulationMaximum
-      , populationMaximumLower = absolutePopulationMinimum
-      , populationMaximumUpper = absolutePopulationMaximum
-      , grassland = absoluteGrasslandMaximum
-      , forest = absoluteForestMaximum
+      , showPescavores = True
+      , socialMinimumLower = socialMinimum
+      , socialMinimumUpper = socialMaximum
+      , socialMaximumLower = socialMinimum
+      , socialMaximumUpper = socialMaximum
+      , populationMinimumLower = populationMinimum
+      , populationMinimumUpper = populationMaximum
+      , populationMaximumLower = populationMinimum
+      , populationMaximumUpper = populationMaximum
+      , grassland = grasslandMaximum
+      , forest = forestMaximum
       }
     , Cmd.none
     )
@@ -114,18 +122,29 @@ createFilters model =
             \_ -> False
 
         typeFilter =
-            case ( model.showHerbivores, model.showCarnivores ) of
-                ( True, True ) ->
-                    keepAll
+            let
+                herbiFilterFn =
+                    if model.showHerbivores then
+                        filterByType Herbivore
 
-                ( True, False ) ->
-                    filterByType Herbivore
+                    else
+                        keepNone
 
-                ( False, True ) ->
-                    filterByType Carnivore
+                carniFilterFn =
+                    if model.showCarnivores then
+                        filterByType Carnivore
 
-                ( False, False ) ->
-                    keepNone
+                    else
+                        keepNone
+
+                pescaFilterFn =
+                    if model.showPescavores then
+                        filterByType Pescavore
+
+                    else
+                        keepNone
+            in
+            \dino -> herbiFilterFn dino || carniFilterFn dino || pescaFilterFn dino
     in
     [ typeFilter
     , isWithinBoundariesFilter model.socialMinimumLower model.socialMinimumUpper .socialMin
@@ -160,6 +179,7 @@ type Msg
     | PopulationMaximumUpperChanged Float
     | GrasslandChanged Float
     | ForestChanged Float
+    | ShowTypeChanged DinosaurType
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -220,6 +240,21 @@ update msg model =
             { model | forest = round newVal }
                 |> updateFilteredDinos
 
+        ShowTypeChanged dinosaurType ->
+            let
+                filterChangedModel =
+                    case dinosaurType of
+                        Herbivore ->
+                            { model | showHerbivores = not model.showHerbivores }
+
+                        Carnivore ->
+                            { model | showCarnivores = not model.showCarnivores }
+
+                        Pescavore ->
+                            { model | showPescavores = not model.showPescavores }
+            in
+            filterChangedModel |> updateFilteredDinos
+
 
 
 ---- VIEW ----
@@ -234,15 +269,21 @@ dinoTypeToString dinoType =
         Carnivore ->
             "Carnivore"
 
+        Pescavore ->
+            "Pescavore"
+
 
 dinoTypeToImage : DinosaurType -> String
 dinoTypeToImage dinoType =
     case dinoType of
         Herbivore ->
-            "%PUBLIC_URL%/1f995.svg"
+            "%PUBLIC_URL%/1f33f.svg"
 
         Carnivore ->
-            "%PUBLIC_URL%/1f996.svg"
+            "%PUBLIC_URL%/1f969.svg"
+
+        Pescavore ->
+            "%PUBLIC_URL%/1f41f.svg"
 
 
 bigImage : String -> String -> Html Msg
@@ -334,8 +375,22 @@ createRow dino =
 -- TODO
 
 
-slider =
-    input [ type_ "range", min "1", max "23", step "1" ] []
+filtersView : Model -> Html Msg
+filtersView model =
+    let
+        checkbox inputId isChecked dinosaurType txt =
+            label [ for inputId ]
+                [ input [ type_ "checkbox", id inputId, checked isChecked, onClick (ShowTypeChanged dinosaurType) ] []
+                , text txt
+                ]
+    in
+    form []
+        [ fieldset [ name "dinosaur-type-filter" ]
+            [ checkbox "herbivore-checkbox" model.showHerbivores Herbivore "Herbivores"
+            , checkbox "carnivore-checkbox" model.showCarnivores Carnivore "Carnivores"
+            , checkbox "pescavore-checkbox" model.showPescavores Pescavore "Pescavores"
+            ]
+        ]
 
 
 view : Model -> Html Msg
@@ -353,7 +408,7 @@ view model =
     -}
     div []
         [ div []
-            [ slider
+            [ filtersView model
             ]
         , div []
             [ ol [ class "main-dino-list" ]
@@ -363,104 +418,6 @@ view model =
 
 
 
-{-
-   elmUiView : Model -> Html Msg
-   elmUiView model =
-       let
-
-
-           filterConfiguration =
-               let
-                   checkbox onChangeMsg checkedVal labelText =
-                       Element.Input.checkbox []
-                           { onChange = onChangeMsg
-                           , icon = Element.Input.defaultCheckbox
-                           , checked = checkedVal
-                           , label = Element.Input.labelRight [] (Element.text labelText)
-                           }
-
-                   singleSliderRow absMin absMax onChangeMsg currentValue labelText =
-                       Element.Input.slider []
-                           { onChange = onChangeMsg
-                           , label = Element.Input.labelAbove [] (Element.text labelText)
-                           , min = absMin
-                           , max = absMax
-                           , value = toFloat currentValue
-                           , thumb = defaultThumb
-                           , step = Just 1
-                           }
-
-                   sliderRow absMin absMax minimumConfig maximumConfig =
-                       let
-                           slider onChangeMsg currentValue labelText =
-                               Element.Input.slider []
-                                   { onChange = onChangeMsg
-                                   , label = Element.Input.labelAbove [] (Element.text labelText)
-                                   , min = absMin
-                                   , max = absMax
-                                   , value = toFloat currentValue
-                                   , thumb = defaultThumb
-                                   , step = Just 1
-                                   }
-                       in
-                       Element.row []
-                           [ slider minimumConfig.onChangeMsg minimumConfig.currentValue minimumConfig.labelText
-                           , slider maximumConfig.onChangeMsg maximumConfig.currentValue maximumConfig.labelText
-                           ]
-               in
-               Element.column []
-                   [ checkbox ShowHerbivoresChanged model.showHerbivores "Herbivores"
-                   , checkbox ShowCarnivoresChanged model.showCarnivores "Carnivores"
-                   , sliderRow absoluteSocialMinimum
-                       absoluteSocialMaximum
-                       { onChangeMsg = SocialMinimumLowerChanged
-                       , currentValue = model.socialMinimumLower
-                       , labelText = "Social Min From:" ++ String.fromInt model.socialMinimumLower
-                       }
-                       { onChangeMsg = SocialMinimumUpperChanged
-                       , currentValue = model.socialMinimumUpper
-                       , labelText = "Social Min To:" ++ String.fromInt model.socialMinimumUpper
-                       }
-                   , sliderRow absoluteSocialMinimum
-                       absoluteSocialMaximum
-                       { onChangeMsg = SocialMaximumLowerChanged
-                       , currentValue = model.socialMaximumLower
-                       , labelText = "Social Max From:" ++ String.fromInt model.socialMaximumLower
-                       }
-                       { onChangeMsg = SocialMaximumUpperChanged
-                       , currentValue = model.socialMaximumUpper
-                       , labelText = "Social Max To:" ++ String.fromInt model.socialMaximumUpper
-                       }
-                   , sliderRow absolutePopulationMinimum
-                       absolutePopulationMaximum
-                       { onChangeMsg = PopulationMinimumLowerChanged
-                       , currentValue = model.populationMinimumLower
-                       , labelText = "Population Min From:" ++ String.fromInt model.populationMinimumLower
-                       }
-                       { onChangeMsg = PopulationMinimumUpperChanged
-                       , currentValue = model.populationMinimumUpper
-                       , labelText = "Population Min To:" ++ String.fromInt model.populationMinimumUpper
-                       }
-                   , sliderRow absolutePopulationMinimum
-                       absolutePopulationMaximum
-                       { onChangeMsg = PopulationMaximumLowerChanged
-                       , currentValue = model.populationMaximumLower
-                       , labelText = "Population Max From:" ++ String.fromInt model.populationMaximumLower
-                       }
-                       { onChangeMsg = PopulationMaximumUpperChanged
-                       , currentValue = model.populationMaximumUpper
-                       , labelText = "Population Max To:" ++ String.fromInt model.populationMaximumUpper
-                       }
-                   , singleSliderRow absoluteGrasslandMinimum absoluteGrasslandMaximum GrasslandChanged model.grassland ("Grassland avail.:" ++ String.fromInt model.grassland)
-                   , singleSliderRow absoluteForestMinimum absoluteForestMaximum ForestChanged model.forest ("Forest avail.:" ++ String.fromInt model.forest)
-                   ]
-       in
-       Element.layout [] <|
-           Element.wrappedRow []
-               [ Element.column [] [ filterConfiguration ]
-               , Element.column [] [ resultsTable ]
-               ]
--}
 ---- SUBSCRIPTIONS ----
 ---- PROGRAM ----
 
